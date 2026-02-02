@@ -173,20 +173,17 @@ def simulate_stop(F_percent, Total_Torque, Wheelbase, COG, Wheel_diameter, Initi
         FB = FBF[0] + FBR[0]  # Total braking force is the sum of the front and rear braking forces (N)
 
 
-        FTF = cross_prod(rF, FBF)     # The moment applied to the COM of the vehicle by the front braking force (Nm)
-        FTR = cross_prod(rR, FBR)     # The moment applied to the COM of the vehicle by the rear braking force (Nm)
-
-
-        ft = [FTF[i] + FTR[i] for i in range(min(len(FTF), len(FTR)))]  # Intermedite vector sum of front and rear moments (Nm)
-        FT = abs(ft[2])   # Modulus of the moment on the COM of the vehicle (Nm)
-
+        FTF = sum(cross_prod(rF, FBF))     # The moment applied to the COM of the vehicle by the front braking force (Nm)
+        FTR = sum(cross_prod(rR, FBR))     # The moment applied to the COM of the vehicle by the rear braking force (Nm)
+        
+        FT = FTF + FTR   # Moment on the COM of the vehicle (Nm)
 
         A = FB/Mass    # Calculating the x-dimension of acceleration on the vehicle (m/s^2)
         velo += step * A   # Taking an approximate integral with dt = step for the velocity value (m/s)
         distance += step * velo  # Taking an approximate integral with dt = step for the distance value (m)
 
-        FNF = FNF0 + FT / math.sqrt(rFx**2 + rFy**2)  # Recalculating the front normal force with the torque on the vehicle included (N)
-        FNR = FNR0 - FT / math.sqrt(rFx**2 + rFy**2)  # Recalculating the rear normal force with the torque on the vehicle included (N)
+        FNF = FNF0 + FT / rFx  # Recalculating the front normal force with the torque on the vehicle included (N)
+        FNR = FNR0 - FT / rRx  # Recalculating the rear normal force with the torque on the vehicle included (N)
         time += step            # Incrememnting the time clock
 
         # Adding a flag value and loop break in the event that the normal force
